@@ -28,6 +28,34 @@ app.get('/api/dishes', async (req, res) => {
   }
 });
 
+// Route for fetching dish by name from MongoDB
+app.get('/api/dishes/:name', async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    const safeName = escapeRegex(name);
+
+    // Regex passed to Mongoose which converts param to
+    // lowercase & looks for dish by name
+    const dish = await Dish.find({ name: new RegExp(safeName, 'i') });
+
+    if (!dish || dish.length === 0) {
+      return res.status(404).json({ message: 'Dish does not exist' });
+    }
+    res.json(dish)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Something has gone wrong' });
+  }
+});
+
+
+// Small helper function to escape unsafe Regex characters from user input
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+
 // Starts server
 app.listen(port);
 console.log('Server started at http://localhost:' + port);
