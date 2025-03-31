@@ -1,16 +1,20 @@
+require('dotenv').config()
 const mongoose = require('mongoose');
 
-const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
+const uri = process.env.CONNECTION_URL
+const clientOptions = { dbName: 'DA219B-Lab1', serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
-async function run() {
+async function connectDb() {
   try {
     // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
     await mongoose.connect(uri, clientOptions);
     await mongoose.connection.db.admin().command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await mongoose.disconnect();
+  } catch (err) {
+    // Shuts down server if error occurs
+    console.log(err)
+    process.exit(1)
   }
 }
-run().catch(console.dir);
+
+module.exports = connectDb;
