@@ -6,7 +6,10 @@
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
-  <button onClick="loadData()">Show data</button>
+  <button onClick="loadAll()">Show all dishes</button>
+  <br></br>
+  <input type="text" id="search-input" placeholder="Enter dish name" />
+  <button onClick="loadByName()">Search By Name</button>
   <div id="dish-list"></div>
 <script src="app.js"></script> 
 </body>
