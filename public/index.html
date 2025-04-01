@@ -6,10 +6,11 @@
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
-  <h3>Add New Dish</h3>
+  <h3 id="form-header">Add New Dish</h3>
   <form id="add-dish-form" onsubmit="addDish(event)">
+    <input type="text" name="id" placeholder="Dish ID" required />
     <input type="text" name="name" placeholder="Dish name" required />
-    <input type="text" name="origin" placeholder="Origin" required />
+    <input type="text" name="origin" placeholder="Origin" />
     <input type="text" name="cookingTime" placeholder="Cooking Time" />
     <input type="text" name="difficulty" placeholder="Difficulty" />
     <br>
@@ -17,7 +18,8 @@
     <br>
     <textarea name="preparationSteps" placeholder="Steps (comma-separated)" required></textarea>
     <br>
-    <button type="submit">Add Dish</button>
+    <button type="submit" id="form-submit">Add Dish</button>
+    <input type="hidden" name="dishId" id="dish-id" />
   </form>
   <br></br>
   <button onClick="loadAll()">Show all dishes</button>

@@ -20,12 +20,14 @@ function showDishes(dishes) {
   const headerRow = document.createElement('tr');
   headerRow.style.backgroundColor = '#f4f4f4';
   headerRow.innerHTML = `
+        <th>ID</th>
         <th>Name</th>
         <th>Origin</th>
         <th>Cooking Time</th>
         <th>Difficulty</th>
         <th>Ingredients</th>
         <th>Preparation Steps</th>
+        <th>Actions</th>
       `;
   table.appendChild(headerRow);
 
@@ -34,6 +36,7 @@ function showDishes(dishes) {
     const row = document.createElement('tr');
 
     row.innerHTML = `
+          <td>${dish.id}</td>
           <td>${dish.name}</td>
           <td>${dish.origin}</td>
           <td>${dish.cookingTime}</td>
@@ -47,6 +50,9 @@ function showDishes(dishes) {
             <ol>
               ${dish.preparationSteps.map(step => `<li>${step}</li>`).join('')}
             </ol>
+          </td>
+          <td>
+            <button onclick="startEdit('${dish.id}')">Update</button>
           </td>
         `;
 
@@ -83,9 +89,11 @@ function addDish(event) {
 
   const form = document.getElementById('add-dish-form');
   const formData = new FormData(form);
+  const dishId = formData.get('dishId');
 
   // Convert FormData to object
   const dishData = {
+    id: formData.get('id'),
     name: formData.get('name'),
     origin: formData.get('origin'),
     cookingTime: formData.get('cookingTime'),
@@ -94,9 +102,14 @@ function addDish(event) {
     preparationSteps: formData.get('preparationSteps').split(',').map(s => s.trim())
   };
 
+
+  const requestMethod = dishId ? 'PUT' : 'POST';
+  console.log(requestMethod);
+  const route = dishId ? `/api/dishes/${dishId}` : `/api/dishes`;
+
   // Runs POST request to route, passing in new dish data 
-  fetch('/api/dishes', {
-    method: 'POST',
+  fetch(route, {
+    method: requestMethod,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dishData)
   })
@@ -105,10 +118,38 @@ function addDish(event) {
       data.message ? alert(data.message) : alert(data.error);
       //alert(data.message);
       form.reset();
+      // Reset form header & submit button text in case of update 
+      document.getElementById('form-submit').textContent = 'Add Dish';
+      document.getElementById('form-header').textContent = 'Add New Dish'
+      document.getElementById('dish-id').value = '';
+
       loadAll(); // reload updated table
     })
     .catch(err => {
       console.error('Failed to add dish:', err);
       alert('Failed to add dish');
+    });
+}
+
+// Handler for editing dish, populates Add form with target dish attributes fetched via GET route by ID
+function startEdit(id) {
+  fetch(`/api/dishes/id/${id}`)
+    .then(res => res.json())
+    .then(dishes => {
+      const dish = Array.isArray(dishes) ? dishes[0] : dishes;
+      console.log(dish);
+      if (!dish || dish.length === 0) return alert("Dish not found");
+
+      document.querySelector('[name="id"]').value = dish.id;
+      document.querySelector('[name="name"]').value = dish.name;
+      document.querySelector('[name="origin"]').value = dish.origin;
+      document.querySelector('[name="cookingTime"]').value = dish.cookingTime;
+      document.querySelector('[name="difficulty"]').value = dish.difficulty;
+      document.querySelector('[name="ingredients"]').value = Array.isArray(dish.ingredients) ? dish.ingredients.join(',') : '';
+      document.querySelector('[name="preparationSteps"]').value = Array.isArray(dish.preparationSteps) ? dish.preparationSteps.join(',') : '';
+      document.getElementById('dish-id').value = dish.id;
+
+      document.getElementById('form-submit').textContent = 'Update';
+      document.getElementById('form-header').textContent = 'Update the Dish'
     });
 }

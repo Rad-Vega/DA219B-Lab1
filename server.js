@@ -28,6 +28,39 @@ app.get('/api/dishes', async (req, res) => {
   }
 });
 
+// PUT route for updating dish
+app.put('/api/dishes/:id', async (req, res) => {
+  try {
+    const updatedDish = await Dish.findOneAndUpdate({
+      id: parseInt(req.params.id)
+    },
+      req.body, {
+      new: true
+    });
+
+    console.log(updatedDish);
+    if (!updatedDish) return res.status(404).json({ error: 'Dish not found' });
+
+    res.json({ message: 'Dish updated successfully', dish: updatedDish });
+  } catch (error) {
+    console.error('Update operation failed:', error);
+    res.status(500).json({ error: 'Update failed' });
+  }
+});
+
+// Route for retrieving dish info & checking ID before Update
+app.get('/api/dishes/id/:id', async (req, res) => {
+  try {
+    const dish = await Dish.findOne({ id: parseInt(req.params.id) });
+    if (!dish) return res.status(404).json({ message: 'Dish not found' });
+    res.json(dish);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error fetching by ID' });
+  }
+});
+
+
 // Route for fetching dish by name from MongoDB
 app.get('/api/dishes/:name', async (req, res) => {
   try {
@@ -52,10 +85,10 @@ app.get('/api/dishes/:name', async (req, res) => {
 // POST route for adding new dishes to DB
 app.post('/api/dishes', async (req, res) => {
   try {
-    const { name, ingredients, preparationSteps, cookingTime, origin, difficulty } = req.body;
+    const { id, name, ingredients, preparationSteps, cookingTime, origin, difficulty } = req.body;
 
     // Validation for three essential fields, name & ingredients & preparation
-    if (!name || !Array.isArray(ingredients) || !Array.isArray(preparationSteps)) {
+    if (!id || !name || !Array.isArray(ingredients) || !Array.isArray(preparationSteps)) {
       return res.status(400).json({ error: 'Missing or invalid fields' });
     }
 
@@ -66,6 +99,7 @@ app.post('/api/dishes', async (req, res) => {
     }
 
     const newDish = new Dish({
+      id,
       name,
       ingredients,
       preparationSteps,
@@ -82,6 +116,7 @@ app.post('/api/dishes', async (req, res) => {
     res.status(500).json({ error: 'Internal error' });
   }
 });
+
 
 
 // Small helper function to escape unsafe Regex characters from user input
