@@ -77,3 +77,38 @@ function loadByName() {
     })
     .catch(err => alert(err.message));
 }
+
+function addDish(event) {
+  event.preventDefault(); // prevents page reload
+
+  const form = document.getElementById('add-dish-form');
+  const formData = new FormData(form);
+
+  // Convert FormData to object
+  const dishData = {
+    name: formData.get('name'),
+    origin: formData.get('origin'),
+    cookingTime: formData.get('cookingTime'),
+    difficulty: formData.get('difficulty'),
+    ingredients: formData.get('ingredients').split(',').map(i => i.trim()),
+    preparationSteps: formData.get('preparationSteps').split(',').map(s => s.trim())
+  };
+
+  // Runs POST request to route, passing in new dish data 
+  fetch('/api/dishes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dishData)
+  })
+    .then(res => res.json())
+    .then(data => {
+      data.message ? alert(data.message) : alert(data.error);
+      //alert(data.message);
+      form.reset();
+      loadAll(); // reload updated table
+    })
+    .catch(err => {
+      console.error('Failed to add dish:', err);
+      alert('Failed to add dish');
+    });
+}

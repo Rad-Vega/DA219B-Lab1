@@ -49,6 +49,40 @@ app.get('/api/dishes/:name', async (req, res) => {
   }
 });
 
+// POST route for adding new dishes to DB
+app.post('/api/dishes', async (req, res) => {
+  try {
+    const { name, ingredients, preparationSteps, cookingTime, origin, difficulty } = req.body;
+
+    // Validation for three essential fields, name & ingredients & preparation
+    if (!name || !Array.isArray(ingredients) || !Array.isArray(preparationSteps)) {
+      return res.status(400).json({ error: 'Missing or invalid fields' });
+    }
+
+    // Search by Dish name. If it already exists in DB, return function & show collision error
+    // Also uses regex passed to Mongoose which converts name param in request body to lowercase
+    if ((await Dish.find({ name: new RegExp(`^${escapeRegex(name)}$`, 'i') })).length > 0) {
+      return res.status(409).json({ error: 'Dish already exists' });
+    }
+
+    const newDish = new Dish({
+      name,
+      ingredients,
+      preparationSteps,
+      cookingTime,
+      origin,
+      difficulty,
+    });
+
+    await newDish.save();
+    res.status(201).json({ message: 'Dish added successfully', dish: newDish });
+    console.log(newDish);
+  } catch (error) {
+    console.error('Error saving dish: ', error);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
 
 // Small helper function to escape unsafe Regex characters from user input
 function escapeRegex(string) {
