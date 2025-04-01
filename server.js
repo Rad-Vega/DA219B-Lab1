@@ -31,6 +31,11 @@ app.get('/api/dishes', async (req, res) => {
 // PUT route for updating dish
 app.put('/api/dishes/:id', async (req, res) => {
   try {
+    // Handles collisions with DB
+    if (await Dish.findOne({ id: parseInt(id) })) {
+      return res.status(409).json({ error: 'Dish already exists! Update aborted' });
+    }
+
     const updatedDish = await Dish.findOneAndUpdate({
       id: parseInt(req.params.id)
     },
@@ -92,6 +97,11 @@ app.post('/api/dishes', async (req, res) => {
       return res.status(400).json({ error: 'Missing or invalid fields' });
     }
 
+    // Handles collisions with DB
+    if (await Dish.findOne({ id: parseInt(id) })) {
+      return res.status(409).json({ error: 'Dish already exists' });
+    }
+
     // Search by Dish name. If it already exists in DB, return function & show collision error
     // Also uses regex passed to Mongoose which converts name param in request body to lowercase
     if ((await Dish.find({ name: new RegExp(`^${escapeRegex(name)}$`, 'i') })).length > 0) {
@@ -117,7 +127,20 @@ app.post('/api/dishes', async (req, res) => {
   }
 });
 
+// DELETE route for removing dishes from DB
+app.delete('/api/dishes/:id', async (req, res) => {
+  try {
+    const deleteDish = await Dish.findOneAndDelete({ id: parseInt(req.params.id) });
 
+    if (!deleteDish) {
+      return res.status(404).json({ error: 'Dish not found!' });
+    }
+    res.json({ message: 'Dish successfully deleted!' });
+  } catch (error) {
+    console.error('Delete failed: ', error);
+    res.status(500).json({ error: 'Delete failed' });
+  }
+});
 
 // Small helper function to escape unsafe Regex characters from user input
 function escapeRegex(string) {

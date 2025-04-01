@@ -53,6 +53,7 @@ function showDishes(dishes) {
           </td>
           <td>
             <button onclick="startEdit('${dish.id}')">Update</button>
+            <button onclick="deleteDish('${dish.id}')">Delete</button>
           </td>
         `;
 
@@ -89,7 +90,7 @@ function addDish(event) {
 
   const form = document.getElementById('add-dish-form');
   const formData = new FormData(form);
-  const dishId = formData.get('dishId');
+  const dishId = formData.get('dishId'); // hidden field on the page that keeps track of each dish ID
 
   // Convert FormData to object
   const dishData = {
@@ -151,5 +152,23 @@ function startEdit(id) {
 
       document.getElementById('form-submit').textContent = 'Update';
       document.getElementById('form-header').textContent = 'Update the Dish'
+    });
+}
+
+// Function handling requests on the DELETE route to remove dishes from the DB
+function deleteDish(id) {
+  if (!confirm('Are you certain you want to delete this dish?')) return;
+
+  fetch(`/api/dishes/${id}`, {
+    method: 'DELETE'
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert(data.message || data.error);
+      loadAll(); // Refresh the table
+    })
+    .catch(err => {
+      console.error('Delete failed:', err);
+      alert('Failed to delete dish');
     });
 }
