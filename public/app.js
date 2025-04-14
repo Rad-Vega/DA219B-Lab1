@@ -134,6 +134,7 @@ function addDish(event) {
 
 // Handler for editing dish, populates Add form with target dish attributes fetched via GET route by ID
 function startEdit(id) {
+  console.log("Now editing Dish with ID:" + id);
   fetch(`/api/dishes/id/${id}`)
     .then(res => res.json())
     .then(dishes => {

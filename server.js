@@ -31,8 +31,9 @@ app.get('/api/dishes', async (req, res) => {
 // PUT route for updating dish
 app.put('/api/dishes/:id', async (req, res) => {
   try {
+    console.log(req.body);
     // Handles collisions with DB
-    if (await Dish.findOne({ id: parseInt(id) })) {
+    if (await Dish.findOne({ id: parseInt(req.params.id) })) {
       return res.status(409).json({ error: 'Dish already exists! Update aborted' });
     }
 
@@ -56,6 +57,7 @@ app.put('/api/dishes/:id', async (req, res) => {
 // Route for retrieving dish info & checking ID before Update
 app.get('/api/dishes/id/:id', async (req, res) => {
   try {
+    console.log("in ID catch. ID is " + req.params.id);
     const dish = await Dish.findOne({ id: parseInt(req.params.id) });
     if (!dish) return res.status(404).json({ message: 'Dish not found' });
     res.json(dish);
