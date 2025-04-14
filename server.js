@@ -32,11 +32,6 @@ app.get('/api/dishes', async (req, res) => {
 app.put('/api/dishes/:id', async (req, res) => {
   try {
     console.log(req.body);
-    // Handles collisions with DB
-    if (await Dish.findOne({ id: parseInt(req.params.id) })) {
-      return res.status(409).json({ error: 'Dish already exists! Update aborted' });
-    }
-
     const updatedDish = await Dish.findOneAndUpdate({
       id: parseInt(req.params.id)
     },
